@@ -8,7 +8,7 @@ from ulauncher.api.shared.action.RenderResultListAction import RenderResultListA
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
 
 _icon_ = "images/icon.svg"
-_db_ = os.getenv("HOME") + "/.testetestes.db"
+_db_ = os.getenv("HOME") + "/.kv.db"
 _name_ = "Kv"
 
 
