@@ -16,19 +16,29 @@ https://github.com/laercioskt/ulauncher-kv
 
 Enter a query in the form of 
 
-[set] "key" "value" | [get] "key" [unset]
+```
+[set] <key> <value> | [get] <key> [unset]
+```
 
 
 ## example of store a new "key" -> "value"
 
-**kv** **set** someKey someValue
+```
+kv set someKey someValue
+```
 
 ## example of remove a "key" -> "value"
 
-**kv** **get** someKey **unset**
+```
+kv get someKey unset
+```
 
 ## examples of get "value" filtering by key
 
-**kv** **get** someKey
+```
+kv get someKey
+```
 
-**kv** **get** omeKe
+```
+kv get omeKe
+```
