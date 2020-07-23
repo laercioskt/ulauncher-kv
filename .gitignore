@@ -1,0 +1,8 @@
+__pycache__
+.cache
+.mypy_cache/
+/.idea/com.github.ulauncher.ulauncher-kv.iml
+/.idea/dbnavigator.xml
+/.idea/misc.xml
+/.idea/vcs.xml
+/.idea/modules.xml
