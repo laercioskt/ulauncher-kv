@@ -7,9 +7,9 @@ from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
 
-_icon_ = "images/icon.svg"
+_ICON_ = "images/icon.svg"
 _db_ = os.getenv("HOME") + "/.kv.db"
-_name_ = "Kv"
+_NAME_ = "Kv"
 
 
 class KvExtension(Extension):
@@ -28,7 +28,8 @@ class KeywordQueryEventListener(EventListener):
     def on_event(self, event, extension):
         arguments = (event.get_query().get_argument() or "").split()
         if self.is_get(arguments):
-            return RenderResultListAction(self.get_action(""))
+            filter = arguments[0] if len(arguments) == 1 else ""
+            return RenderResultListAction(self.get_action(filter))
         if self.is_get_with_filter(arguments):
             return RenderResultListAction(self.get_action(arguments[1]))
         if self.is_unset(arguments):
@@ -39,7 +40,7 @@ class KeywordQueryEventListener(EventListener):
             return RenderResultListAction(self.default_action())
 
     def is_get(self, arguments):
-        return len(arguments) == 1 and arguments[0] == "get"
+        return ( len(arguments) == 1 and arguments[0] == "get" ) or ( len(arguments) == 1 and arguments[0] != "set" )
 
     def is_get_with_filter(self, arguments):
         return len(arguments) == 2 and arguments[0] == "get"
@@ -52,7 +53,7 @@ class KeywordQueryEventListener(EventListener):
 
     def set_action(self, key, value):
         connection = sqlite3.connect(_db_)
-        item = ExtensionResultItem(icon=_icon_, name="{} = {}".format(key, value))
+        item = ExtensionResultItem(icon=_ICON_, name="{} = {}".format(key, value))
         cursor = connection.execute("SELECT key, value from KV where key = '{}'".format(key))
         exists = 0
         for _ in cursor:
@@ -78,14 +79,14 @@ class KeywordQueryEventListener(EventListener):
             key = row[0]
             value = row[1]
             item = ExtensionResultItem(
-                icon=_icon_, 
+                icon=_ICON_,
                 name="{} = {}".format(key, value),
                 description="Press enter or click to copy '{}' to clipboard or type 'unset' to unset from db".format(value),
                 on_enter=CopyToClipboardAction(value))
             items.append(item)
 
         if not exists:
-            item = ExtensionResultItem(icon=_icon_, name=_name_)
+            item = ExtensionResultItem(icon=_ICON_, name=_NAME_)
             if key_filter == "":
                 item._description = "It looks like you have nothing stored"
             else:
@@ -104,7 +105,7 @@ class KeywordQueryEventListener(EventListener):
             exists = 1
             key = row[0]
             value = row[1]
-        item = ExtensionResultItem(icon=_icon_, name=_name_)
+        item = ExtensionResultItem(icon=_ICON_, name=_NAME_)
         if exists:
             item._description = "Key '{}' of Value '{}' unset".format(key, value)
             statement = "DELETE FROM KV WHERE KEY = '{}'".format(key)
@@ -117,9 +118,11 @@ class KeywordQueryEventListener(EventListener):
     def default_action(self):
         return [
             ExtensionResultItem(
-                icon=_icon_,
-                name=_name_, 
-                description="Enter a query in the form of \"[set] <key> <value> | [get] <key>; [unset]\"")
+                icon=_ICON_,
+                name=_NAME_,
+                description="Enter: \"[set] <key> <value> "
+                            "| [get] <key>; [unset]\""
+                            "| (or just) <key>\"")
         ]
 
 
@@ -128,9 +131,11 @@ class ItemEnterEventListener(EventListener):
     def on_event(self, event, extension):
         return RenderResultListAction(
             [ExtensionResultItem(
-                icon=_icon_,
-                name=_name_,
-                description="Enter a query in the form of \"[set] <key> <value> | [get] <key>; [unset]\"")])
+                icon=_ICON_,
+                name=_NAME_,
+                description="Enter: \"[set] <key> <value> "
+                            "| [get] <key>; [unset]\""
+                            "| (or just) <key>\"")])
 
 
 if __name__ == '__main__':
