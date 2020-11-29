@@ -17,14 +17,14 @@ https://github.com/laercioskt/ulauncher-kv
 Enter a query in the form of 
 
 ```
-[set] <key> <value> | [get] <key> [unset]
+[set] <key> <value> | [get] <key> [unset] | <key> (simple way to [get])
 ```
 
 
 ## example of store a new "key" -> "value"
 
 ```
-kv set someKey someValue
+kv set someKey some value
 ```
 
 ## example of remove a "key" -> "value"
@@ -40,5 +40,13 @@ kv get someKey
 ```
 
 ```
-kv get omeKe
+kv get partofakey
+```
+
+```
+kv someKey
+```
+
+```
+kv partofakey
 ```
