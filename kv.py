@@ -12,10 +12,7 @@ logger = logging.getLogger(__name__)
 
 class Actions():
 
-    def execute(self) -> None:
-        pass
-
-    if __name__ == "__main__":
+    def __init__(self):
         connection = sqlite3.connect(_db_)
         statement = '''CREATE TABLE IF NOT EXISTS KV ( KEY TEXT NOT NULL, VALUE TEXT NOT NULL );'''
         connection.execute(statement)
