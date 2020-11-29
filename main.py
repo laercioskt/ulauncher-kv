@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import logging
 from ulauncher.api.client.Extension import Extension
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent
@@ -10,6 +11,7 @@ from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAct
 _ICON_ = "images/icon.svg"
 _db_ = os.getenv("HOME") + "/.kv.db"
 _NAME_ = "Kv"
+logger = logging.getLogger(__name__)
 
 
 class KvExtension(Extension):
@@ -35,7 +37,7 @@ class KeywordQueryEventListener(EventListener):
         if self.is_unset(arguments):
             return RenderResultListAction(self.get_unset_action(arguments[1]))
         if self.is_set(arguments):
-            return RenderResultListAction(self.set_action(arguments[1], arguments[2]))
+            return RenderResultListAction(self.set_action(arguments[1], ' '.join(arguments[2:])))
         else:
             return RenderResultListAction(self.default_action())
 
@@ -49,7 +51,7 @@ class KeywordQueryEventListener(EventListener):
         return len(arguments) == 3 and arguments[0] == "get" and arguments[2] == "unset"
 
     def is_set(self, arguments):
-        return len(arguments) == 3 and arguments[0] == "set"
+        return len(arguments) >= 3 and arguments[0] == "set"
 
     def set_action(self, key, value):
         connection = sqlite3.connect(_db_)
@@ -67,6 +69,7 @@ class KeywordQueryEventListener(EventListener):
             item._description = "Insert '{}' with '{}'".format(key, value)
         connection.execute(statement)
         connection.commit()
+        logger.debug("Insert '{}' with '{}'".format(key, value))
         return [item]
 
     def get_action(self, key_filter):
