@@ -33,7 +33,7 @@ kv set someKey some value
 kv get someKey unset
 ```
 
-## examples of get "value" filtering by key
+## examples of get "value" filtering by "key"
 
 ```
 kv get someKey
