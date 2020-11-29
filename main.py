@@ -1,6 +1,5 @@
-import sqlite3
-import os
 import logging
+from kv import Actions
 from ulauncher.api.client.Extension import Extension
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent
@@ -9,10 +8,8 @@ from ulauncher.api.shared.action.RenderResultListAction import RenderResultListA
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
 
 _ICON_ = "images/icon.svg"
-_db_ = os.getenv("HOME") + "/.kv.db"
 _NAME_ = "Kv"
 logger = logging.getLogger(__name__)
-
 
 class KvExtension(Extension):
 
@@ -20,9 +17,7 @@ class KvExtension(Extension):
         super(KvExtension, self).__init__()
         self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
         self.subscribe(ItemEnterEvent, ItemEnterEventListener())
-        connection = sqlite3.connect(_db_)
-        statement = '''CREATE TABLE IF NOT EXISTS KV ( KEY TEXT NOT NULL, VALUE TEXT NOT NULL );'''
-        connection.execute(statement)
+        self.actions = Actions()
 
 
 class KeywordQueryEventListener(EventListener):
@@ -31,15 +26,15 @@ class KeywordQueryEventListener(EventListener):
         arguments = (event.get_query().get_argument() or "").split()
         if self.is_get(arguments):
             filter = arguments[0] if len(arguments) == 1 else ""
-            return RenderResultListAction(self.get_action(filter))
+            return RenderResultListAction(extension.actions.get_action(filter))
         if self.is_get_with_filter(arguments):
-            return RenderResultListAction(self.get_action(arguments[1]))
+            return RenderResultListAction(extension.actions.get_action(arguments[1]))
         if self.is_unset(arguments):
-            return RenderResultListAction(self.get_unset_action(arguments[1]))
+            return RenderResultListAction(extension.actions.get_unset_action(arguments[1]))
         if self.is_set(arguments):
-            return RenderResultListAction(self.set_action(arguments[1], ' '.join(arguments[2:])))
+            return RenderResultListAction(extension.actions.set_action(arguments[1], ' '.join(arguments[2:])))
         else:
-            return RenderResultListAction(self.default_action())
+            return RenderResultListAction(extension.actions.default_action())
 
     def is_get(self, arguments):
         return ( len(arguments) == 1 and arguments[0] == "get" ) or ( len(arguments) == 1 and arguments[0] != "set" )
@@ -53,81 +48,6 @@ class KeywordQueryEventListener(EventListener):
     def is_set(self, arguments):
         return len(arguments) >= 3 and arguments[0] == "set"
 
-    def set_action(self, key, value):
-        connection = sqlite3.connect(_db_)
-        item = ExtensionResultItem(icon=_ICON_, name="{} = {}".format(key, value))
-        cursor = connection.execute("SELECT key, value from KV where key = '{}'".format(key))
-        exists = 0
-        for _ in cursor:
-            exists = 1
-            break
-        if exists:
-            statement = "UPDATE KV SET VALUE = '{}' WHERE KEY = '{}'".format(value, key)
-            item._description = "Update '{}' with '{}'".format(key, value)
-        else:
-            statement = "INSERT INTO KV (KEY,VALUE) VALUES ('{}', '{}')".format(key, value)
-            item._description = "Insert '{}' with '{}'".format(key, value)
-        connection.execute(statement)
-        connection.commit()
-        logger.debug("Insert '{}' with '{}'".format(key, value))
-        return [item]
-
-    def get_action(self, key_filter):
-        connection = sqlite3.connect(_db_)
-        items = []
-        exists = 0
-        statement = "SELECT key, value from KV where key like '%{}%'".format(key_filter)
-        for row in connection.execute(statement):
-            exists = 1
-            key = row[0]
-            value = row[1]
-            item = ExtensionResultItem(
-                icon=_ICON_,
-                name="{} = {}".format(key, value),
-                description="Press enter or click to copy '{}' to clipboard or type 'unset' to unset from db".format(value),
-                on_enter=CopyToClipboardAction(value))
-            items.append(item)
-
-        if not exists:
-            item = ExtensionResultItem(icon=_ICON_, name=_NAME_)
-            if key_filter == "":
-                item._description = "It looks like you have nothing stored"
-            else:
-                item._description = "No VALUE for KEY: '{}'".format(key_filter)
-            items.append(item)
-
-        return items
-
-    def get_unset_action(self, key_filter):
-        connection = sqlite3.connect(_db_)
-        exists = 0
-        statement = "SELECT key, value from KV where key = '{}'".format(key_filter)
-        key = ""
-        value = ""
-        for row in connection.execute(statement):
-            exists = 1
-            key = row[0]
-            value = row[1]
-        item = ExtensionResultItem(icon=_ICON_, name=_NAME_)
-        if exists:
-            item._description = "Key '{}' of Value '{}' unset".format(key, value)
-            statement = "DELETE FROM KV WHERE KEY = '{}'".format(key)
-            connection.execute(statement)
-            connection.commit()
-        else:
-            item._description = "'{}' not found to unset".format(key_filter)
-        return [item]
-
-    def default_action(self):
-        return [
-            ExtensionResultItem(
-                icon=_ICON_,
-                name=_NAME_,
-                description="Enter: \"[set] <key> <value> "
-                            "| [get] <key>; [unset]\""
-                            "| (or just) <key>\"")
-        ]
-
 
 class ItemEnterEventListener(EventListener):
 
@@ -136,9 +56,7 @@ class ItemEnterEventListener(EventListener):
             [ExtensionResultItem(
                 icon=_ICON_,
                 name=_NAME_,
-                description="Enter: \"[set] <key> <value> "
-                            "| [get] <key>; [unset]\""
-                            "| (or just) <key>\"")])
+                description="Enter: \"[set] <key> <value> | [get] <key>; [unset] | (or just) <key>\"")])
 
 
 if __name__ == '__main__':
