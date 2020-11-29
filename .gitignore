@@ -7,3 +7,5 @@ __pycache__
 /.idea/misc.xml
 /.idea/vcs.xml
 /.idea/modules.xml
+actions.pyc
+constant.pyc
