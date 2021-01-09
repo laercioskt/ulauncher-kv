@@ -2,6 +2,10 @@
 
 Ulauncher extension for set and get snippets of any text in a local database
 
+<p align="center">
+  <a href="https://gitter.im/ulauncher-kv/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"><img src="https://badges.gitter.im/ulauncher-kv/community.svg" alt="Gitter"/></a>
+</p>
+
 ![kv](kv.gif)
 
 # Install
