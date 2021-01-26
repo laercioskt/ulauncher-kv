@@ -4,6 +4,8 @@ from constant import ICON, NAME
 
 from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
+from ulauncher.api.shared.action.RunScriptAction import RunScriptAction
+
 
 _LOGGER_ = logging.getLogger(__name__)
 
@@ -11,7 +13,7 @@ _LOGGER_ = logging.getLogger(__name__)
 class DefatulAction(): 
     def __init__(self):
         None
-    
+
     def execute(self):
         _LOGGER_.debug("Executing DefatulAction")
         return [ ExtensionResultItem(icon=ICON, name=NAME, description="Enter: \"[set] <key> <value> | [get] <key>; [unset] | (or just) <key>\"") ]
@@ -25,14 +27,17 @@ class GetAction():
         _LOGGER_.debug("Executing GetAction")
         items = []
         exists = 0
-        for row in self.db.execute_statement("SELECT key, value from KV where key like '%{}%'".format(self.text)):
+        for row in self.db.execute_statement("SELECT key, value, tags from KV where key like '%{}%' or tags like '%{}%'".format(self.text, self.text)):
             exists = 1
             key = row[0]
             value = row[1]
+            value_fix = value.strip().replace('$','\$').replace('"','\\"').replace('`','\\`') + '\n'
+            script_action  = 'sleep 0.01m && echo -n "' + value_fix + '" | xclip -i -selection clipboard && sleep 0.01m && xdotool key --clearmodifiers ctrl+v &'
             item = ExtensionResultItem(
                 icon=ICON,
                 name="{} = {}".format(key, value),
                 description="Press enter or click to copy '{}' to clipboard or type 'unset' to unset from db".format(value),
+                on_alt_enter=RunScriptAction(script_action, []),
                 on_enter=CopyToClipboardAction(value))
             items.append(item)
 
@@ -54,7 +59,7 @@ class UnsetAction():
     def execute(self):
         _LOGGER_.debug("==== Executing UnsetAction")
         exists = 0
-        statement = "SELECT key, value from KV where key = '{}'".format(self.key_filter)
+        statement = "SELECT key, value, tags from KV where key = '{}'".format(self.key_filter)
         key = ""
         value = ""
         for row in self.db.execute_statement(statement):
@@ -79,7 +84,7 @@ class SetAction():
     def execute(self):
         _LOGGER_.debug("==== Executing SetAction")
         item = ExtensionResultItem(icon=ICON, name="{} = {}".format(self.key, self.value))
-        cursor = self.db.execute_statement("SELECT key, value from KV where key = '{}'".format(self.key))
+        cursor = self.db.execute_statement("SELECT key, value, tags from KV where key = '{}'".format(self.key))
         exists = 0
         for _ in cursor:
             exists = 1
