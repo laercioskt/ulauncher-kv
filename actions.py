@@ -1,4 +1,5 @@
 import logging
+import cgi
 
 from constant import ICON, NAME
 
@@ -35,7 +36,7 @@ class GetAction():
             script_action  = 'sleep 0.01m && echo -n "' + value_fix + '" | xclip -i -selection clipboard && sleep 0.01m && xdotool key --clearmodifiers ctrl+v &'
             item = ExtensionResultItem(
                 icon=ICON,
-                name="{} = {}".format(key, value),
+                name="{} = {}".format(key, value.replace('&','&amp;')),
                 description="Press enter or click to copy '{}' to clipboard or type 'unset' to unset from db".format(value),
                 on_alt_enter=RunScriptAction(script_action, []),
                 on_enter=CopyToClipboardAction(value))
@@ -83,7 +84,10 @@ class SetAction():
 
     def execute(self):
         _LOGGER_.debug("==== Executing SetAction")
-        item = ExtensionResultItem(icon=ICON, name="{} = {}".format(self.key, self.value))
+        item = ExtensionResultItem(
+            icon=ICON, 
+            name="{} = {}".format(self.key, self.value.replace('&','&amp;')), 
+            description="")
         cursor = self.db.execute_statement("SELECT key, value, tags from KV where key = '{}'".format(self.key))
         exists = 0
         for _ in cursor:
