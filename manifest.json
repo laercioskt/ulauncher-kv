@@ -13,6 +13,13 @@
       "type": "keyword",
       "name": "Kv",
       "default_value": "kv"
+    },
+    {
+      "id": "kv_db_path",
+      "type": "input",
+      "name": "DB Path",
+      "description": "Keep DEFAULT to persist in /home/`user`/.kv.db or specify the whole path, for exemplo, /home/myuser/.my-kv-db-path.db",
+      "default_value": "DEFAULT"
     }
   ]
 }

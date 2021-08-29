@@ -18,7 +18,6 @@ class KvExtension(Extension):
         super(KvExtension, self).__init__()
         self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
         self.subscribe(ItemEnterEvent, ItemEnterEventListener())
-        self.db = DataBase()
         _LOGGER_.debug("KV Extension DataBase Done")
 
 class KeywordQueryEventListener(EventListener):
@@ -27,7 +26,8 @@ class KeywordQueryEventListener(EventListener):
         _LOGGER_.debug("KeywordQueryEventListener executing")
         arguments_or_empty: str = event.get_query().get_argument() or ""
         arguments: list = arguments_or_empty.split()
-        return RenderResultListAction(ActionFactory(arguments, extension.db).create().execute())
+        db = DataBase(extension.preferences['kv_db_path'])
+        return RenderResultListAction(ActionFactory(arguments, db).create().execute())
 
 class ItemEnterEventListener(EventListener):
 

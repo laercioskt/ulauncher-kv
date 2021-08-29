@@ -2,17 +2,18 @@ import logging
 import os
 import sqlite3
 
-_db_ = os.getenv("HOME") + "/.kv.db"
+_db_default_ = os.getenv("HOME") + "/.kv.db"
 _LOGGER_ = logging.getLogger(__name__)
 
 
 class DataBase():
     """ Abstraction of the database using sqlite """
 
-    def __init__(self):
+    def __init__(self, db_path):
         """ Create de data base if not exists """
 
-        connection = sqlite3.connect(_db_)
+        self.db = _db_default_ if db_path == "DEFAULT" else db_path
+        connection = sqlite3.connect(self.db)
 
         statementVersionTable = '''CREATE TABLE IF NOT EXISTS DB_VERSION ( VERSION INTEGER NOT NULL );'''
         connection.execute(statementVersionTable)
@@ -35,7 +36,7 @@ class DataBase():
     def execute_statement(self, statement):
         """ Execute a query, returning dataset and commit the statemente """
 
-        connection = sqlite3.connect(_db_)
+        connection = sqlite3.connect(self.db)
         result = connection.execute(statement)
         connection.commit()
         return result
