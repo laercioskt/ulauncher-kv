@@ -33,7 +33,7 @@ https://github.com/laercioskt/ulauncher-kv
 ## Enter a query in the form of 
 
 ```
-[set] <key> <value> | [get] <key> [unset] | <key> (simple way to [get])
+set <key> <value> | [get] <key> [unset]
 ```
 
 ### Example of store a new "key" -> "value"
@@ -53,11 +53,11 @@ kv get someKey unset
 ```
 kv get someKey
 
-kv get partofakey
+kv get partOfAKey
 
 kv someKey
 
-kv partofakey
+kv partOfAKey
 ```
 
 
