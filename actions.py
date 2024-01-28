@@ -20,7 +20,7 @@ class DefaultAction:
         return [ExtensionResultItem(
             icon=ICON,
             name=NAME,
-            description="Enter: \"[set] <key> <value> | [get] <key>; [unset] | (or just) <key>\"")]
+            description="Enter: \"set <key> <value> | [get] <key> [unset]\"")]
 
 
 class GetAction:
