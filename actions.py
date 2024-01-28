@@ -97,7 +97,8 @@ class SetAction:
         item = ExtensionResultItem(
             icon=ICON,
             name="{} = {}".format(self.key, self.value.replace('&', '&amp;')),
-            description="")
+            description="",
+            on_enter=CopyToClipboardAction(self.value))
         cursor = self.db.execute_statement("SELECT key, value, tags from KV where key = '{}'".format(self.key))
         exists = 0
         for _ in cursor:
