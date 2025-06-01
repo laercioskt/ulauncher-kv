@@ -24,17 +24,20 @@ class DefaultAction:
 
 
 class GetAction:
-    def __init__(self, db, text):
+    def __init__(self, db, text, limit_results):
         self.text = text
         self.db = db
+        self.limit_results = limit_results
 
     def execute(self):
         _LOGGER_.debug("Executing GetAction")
         items = []
         exists = 0
         for row in self.db.execute_statement(
-                "SELECT key, value, tags from KV where key like '%{}%' or tags like '%{}%'".format(self.text,
-                                                                                                   self.text)):
+                "SELECT key, value, tags from KV where key like '%{}%' or tags like '%{}%' LIMIT '{}'".format(
+                    self.text,
+                    self.text,
+                    self.limit_results)):
             exists = 1
             key = row[0]
             value = row[1]
@@ -117,20 +120,21 @@ class SetAction:
 
 class ActionFactory:
 
-    def __init__(self, arguments, db):
+    def __init__(self, arguments, db, limit_results):
         self.arguments = arguments
         self.db = db
+        self.limit_results = limit_results
 
     def create(self):
         if self.is_get_without_filter(self.arguments):
             text = self.arguments[0] if len(self.arguments) == 1 else ""
-            return GetAction(self.db, text)
+            return GetAction(self.db, text, self.limit_results)
         if self.is_get_with_filter(self.arguments):
-            return GetAction(self.db, self.arguments[1])
+            return GetAction(self.db, self.arguments[1], self.limit_results)
         if self.is_set(self.arguments):
             return SetAction(self.db, self.arguments[1], ' '.join(self.arguments[2:]))
         if self.is_set_without_last_argument(self.arguments):
-            return GetAction(self.db, self.arguments[1])
+            return GetAction(self.db, self.arguments[1], self.limit_results)
         if self.is_unset(self.arguments):
             return UnsetAction(self.db, self.arguments[1])
         else:

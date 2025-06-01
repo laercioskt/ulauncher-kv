@@ -20,6 +20,13 @@
       "name": "DB Path",
       "description": "Keep DEFAULT to persist in /home/`user`/.kv.db or specify the whole path, for exemplo, /home/myuser/.my-kv-db-path.db",
       "default_value": "DEFAULT"
+    },
+    {
+      "id": "limit_results",
+      "type": "input",
+      "name": "Limit results",
+      "description": "Determines the maximum number of results to be displayed",
+      "default_value": "10"
     }
   ]
 }

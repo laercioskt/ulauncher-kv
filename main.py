@@ -27,7 +27,8 @@ class KeywordQueryEventListener(EventListener):
         arguments_or_empty: str = event.get_query().get_argument() or ""
         arguments: list = arguments_or_empty.split()
         db = DataBase(extension.preferences['kv_db_path'])
-        return RenderResultListAction(ActionFactory(arguments, db).create().execute())
+        limit_results = extension.preferences['limit_results']
+        return RenderResultListAction(ActionFactory(arguments, db, limit_results).create().execute())
 
 class ItemEnterEventListener(EventListener):
 

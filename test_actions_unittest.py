@@ -1,11 +1,11 @@
-from actions import ActionFactory, DefatulAction, GetAction, SetAction, UnsetAction
+from actions import ActionFactory, DefaultAction, GetAction, SetAction, UnsetAction
 
 def test_create_action_default_when_type_no_arguments():
     arguments = []
     
     action = ActionFactory(arguments).create()
 
-    assert isinstance(action, DefatulAction), "Should be DefatulAction"
+    assert isinstance(action, DefaultAction), "Should be DefatulAction"
 
 def test_create_action_get_when_type_text_without_get():
     arguments = ['aKey']
